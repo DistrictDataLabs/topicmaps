@@ -39,7 +39,7 @@ router.register(r'status', HeartbeatViewSet, "status")
 
 urlpatterns = [
     # Admin URLs
-    url(r'^jet/', include('jet.urls', 'jet')),
+    url(r'^grappelli/', include('grappelli.urls', 'grappelli')),
     url(r'^admin/', include(admin.site.urls)),
 
     # Application URLs

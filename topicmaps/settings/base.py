@@ -94,7 +94,7 @@ WSGI_APPLICATION = 'topicmaps.wsgi.application'
 ## Application definition
 INSTALLED_APPS = (
     # Django apps
-    'jet', # Must come before admin
+    'grappelli', # Must come before admin
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
