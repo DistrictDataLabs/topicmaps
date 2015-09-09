@@ -33,6 +33,7 @@ from topics.views import *
 ## API
 router = routers.DefaultRouter()
 router.register(r'status', HeartbeatViewSet, "status")
+router.register(r'topics', TopicViewSet, "topic")
 
 ##########################################################################
 ## URL Patterns

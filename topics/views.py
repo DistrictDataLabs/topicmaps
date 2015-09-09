@@ -17,14 +17,16 @@ Views for the Topics application
 ## Imports
 ##########################################################################
 
-import json
-
 from topics.models import Topic
+from topics.serializers import *
 from topics.forms import MultiTopicForm
 
 from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
 from django.core.urlresolvers import reverse
+
+from rest_framework import viewsets
+from rest_framework.response import Response
 
 ##########################################################################
 ## HTML/Django Views
@@ -36,7 +38,7 @@ class ResultView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(ResultView, self).get_context_data(**kwargs)
-        context['topics'] = json.dumps(list(Topic.objects.with_votes().values('title', 'vote_total')))
+        # context['topics'] = json.dumps(list(Topic.objects.with_votes().values('title', 'vote_total')))
         return context
 
 
@@ -57,3 +59,17 @@ class MultiTopicView(FormView):
     def form_valid(self, form):
         form.save_topics()
         return super(MultiTopicView, self).form_valid(form)
+
+
+##########################################################################
+## API/DRF Views
+##########################################################################
+
+class TopicViewSet(viewsets.ViewSet):
+
+    queryset = Topic.objects.with_votes().order_by('-vote_total')
+    serializer_class = TopicSerializer
+
+    def list(self, request):
+        queryset = self.queryset.values('title', 'vote_total')[:300]
+        return Response(queryset)

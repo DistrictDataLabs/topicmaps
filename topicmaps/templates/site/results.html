@@ -18,25 +18,37 @@
   <script type="text/javascript">
     (function() {
 
-      var fill  = d3.scale.ordinal().range(colorbrewer.Set1[9]);
-      var width = $("#wordcloud").width();
-      var words = JSON.parse('{{ topics|safe }}');
-      var scale = d3.scale.log()
-                    .domain(_.map(words, function(w) { return w.vote_total }).range())
-                    .range([10, 100]);
+      var url    = "/api/topics/";
+      var fill   = d3.scale.ordinal().range(colorbrewer.Set1[9]);
+      var width  = $("#wordcloud").width();
+      var scale  = d3.scale.log().range([10, 100]);
+      var layout = null;
 
-      var layout = d3.layout.cloud()
-          .size([width, 600])
-          .words(words.map(function(d) {
-            return {text: d.title, size: scale(d.vote_total)};
-          }))
-          .padding(5)
-          // .rotate(function() { return ~~(Math.random() * 2) * 90; })
-          .font("Impact")
-          .fontSize(function(d) { return d.size; })
-          .on("end", draw);
+      $.get(url)
+        .success(function(words) {
 
-      layout.start();
+          // Set the scale according to the words domain.
+          scale.domain(_.map(words, function(w) { return w.vote_total }).range());
+
+          // Setup the layout with the various words.
+          layout = d3.layout.cloud()
+            .size([width, 600])
+            .words(words.map(function(d) {
+              return {text: d.title, size: scale(d.vote_total)};
+            }))
+            .padding(5)
+            // .rotate(function() { return ~~(Math.random() * 2) * 90; })
+            .font("Impact")
+            .fontSize(function(d) { return d.size; })
+            .on("end", draw);
+
+          // Star the layout draw.
+          layout.start();
+        })
+        .fail(function() {
+          console.log("Could not fetch data from the API!");
+        });
+
 
       function draw(words) {
         d3.select("#wordcloud").append("svg")
