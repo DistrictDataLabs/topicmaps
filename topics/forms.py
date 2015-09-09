@@ -32,7 +32,7 @@ class MultiTopicForm(forms.Form):
 
     topics = forms.CharField(
         widget=forms.Textarea, required=True,
-        help_text="Enter multiple topics, separated by a new line."
+        help_text="Enter multiple topics each on their own line."
     )
 
     def __init__(self, *args, **kwargs):

@@ -8,6 +8,11 @@
 {% endblock %}
 
 {% block panel-content %}
+  <div id="successMessage" class="alert alert-success alert-dismissible fade in" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <strong>Thanks!</strong> We appreciate your feedback! Feel free to go back and add more topics at any time.
+  </div>
+
   <div class="panel panel-default">
     <div class="panel-heading">
       <h3 class="panel-title">300 Most Popular Topics</h3>
@@ -130,6 +135,11 @@
       var data = JSON.parse('{{ time_series|safe }}');
       console.log(data);
       ts.add_line('responses', data);
+
+      // Set alert timeout
+      setTimeout(function() {
+        $("#successMessage").alert('close');
+      }, 3000);
 
     })();
   </script>
