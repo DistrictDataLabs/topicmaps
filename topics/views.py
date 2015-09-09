@@ -17,6 +17,8 @@ Views for the Topics application
 ## Imports
 ##########################################################################
 
+import json
+
 from topics.models import Topic
 from topics.forms import MultiTopicForm
 
@@ -34,7 +36,7 @@ class ResultView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(ResultView, self).get_context_data(**kwargs)
-        context['topics'] = Topic.objects.all()
+        context['topics'] = json.dumps(list(Topic.objects.with_votes().values('title', 'vote_total')))
         return context
 
 

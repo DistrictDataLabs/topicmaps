@@ -39,3 +39,7 @@ body {
 #footerStatus {
     font-size: 12px;
 }
+
+#wordcloud {
+    min-height: 600px;
+}

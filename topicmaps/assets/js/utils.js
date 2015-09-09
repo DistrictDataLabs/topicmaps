@@ -18,6 +18,20 @@
     });
   };
 
+  Array.prototype.max = function() {
+    return Math.max.apply(null, this);
+  };
+
+  Array.prototype.min = function() {
+    return Math.min.apply(null, this);
+  };
+
+  Array.prototype.range = function() {
+    return [
+      this.min(), this.max()
+    ]
+  }
+
   utils = {
     /*
      * Similar to humanize.intcomma - renders an integer with thousands-
