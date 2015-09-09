@@ -106,6 +106,7 @@ INSTALLED_APPS = (
     'rest_framework',
 
     # TopicMaps apps
+    'topics',
 )
 
 ## Request Handling
@@ -182,6 +183,12 @@ EMAIL_HOST_USER      = environ_setting("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD  = environ_setting("EMAIL_HOST_PASSWORD")
 EMAIL_PORT      = 587
 EMAIL_SUBJECT_PREFIX = '[TOPICMAPS] '
+
+##########################################################################
+## CMS
+##########################################################################
+
+GRAPPELLI_ADMIN_TITLE = "DDL Topic Maps CMS"
 
 ##########################################################################
 ## Django REST Framework
