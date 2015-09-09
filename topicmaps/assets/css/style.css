@@ -41,5 +41,36 @@ body {
 }
 
 #wordcloud {
-    min-height: 600px;
+    min-height: 500px;
+}
+
+#timeseries {
+    min-height: 216px;
+}
+
+/* D3 Styles */
+
+.axis path {
+    fill: none;
+    stroke: #777;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 10px;
+}
+
+.line {
+fill: none;
+stroke: steelblue;
+stroke-width: 1.5px;
+}
+
+.dot {
+  stroke: #000;
+}
+
+.label {
+  fill: #777;
 }

@@ -1,0 +1,88 @@
+{% extends 'site/home.html' %}
+{% load bootstrap3 %}
+
+{% block breadcrumbs %}
+<li><a href="/"><i class="fa fa-home"></i> Home</a></li>
+<li class="active"><i class="fa fa-flask"></i> Survey</li>
+{% endblock %}
+
+{% block panel-content %}
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Essential Data Science Topics</h3>
+  </div>
+
+  <div class="panel-body">
+
+    <div class="row">
+      <div class="col-md-5">
+        <!-- Topics Form -->
+        <form action="" method="post" class="form" id="topicsForm">
+          {% csrf_token %}
+          {% bootstrap_form form %}
+        </form>
+      </div>
+      <div class="col-md-4">
+        <label class="control-label">Details</label>
+        <p>Please enter the titles of the most essential tools, topics, techniques, or technologies that
+          are are vital to your work as a data scientist. You may enter multiple topics, each on their
+          own line.</p>
+
+        <p>Think of answering a student or intern's question - what do I need to learn to be a data
+          scientist?</p>
+
+        <p>Here are a few randomly selected previous answers to get you started &rarr;</p>
+
+      </div>
+      <div class="col-md-3">
+        <label class="control-label">Suggestions</label>
+        <ul id="primePumpList" class="list-unstyled"></ul>
+      </div>
+    </div>
+
+
+  </div>
+
+  <div class="panel-footer">
+    <button type="submit" form="topicsForm" class="btn btn-default">
+      <i class="fa fa-flask"></i> Submit
+    </button>
+    <button id="btnRefreshSuggestions" type="button" class="btn btn-info">
+      <i class="fa fa-refresh"></i> Refresh Suggestions
+    </button>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ block.super }}
+  <script type="text/javascript">
+    $(function () {
+
+      var url = "/api/topics/?ordering=random&limit=10"
+
+      function refreshSuggestions() {
+        $.get(url)
+          .success(function(data) {
+            var ul = $("#primePumpList")
+            ul.empty();
+            $.each(data, function(idx, obj) {
+              var li = $("<li></li>")
+              li.html("<em>" + obj.title + "</em>");
+              ul.append(li);
+            });
+          })
+          .fail(function() {
+            console.log("Could not fetch random topics to display!");
+          });
+      }
+
+      $("#btnRefreshSuggestions").click(refreshSuggestions);
+
+      // Load initial suggestions
+      refreshSuggestions();
+
+    });
+  </script>
+{% endblock %}

@@ -3,23 +3,79 @@
 
 {% block breadcrumbs %}
 <li><a href="/"><i class="fa fa-home"></i> Home</a></li>
-<li class="active"><i class="fa fa-flask"></i> Results</li>
+<li><a href="{% url 'survey' %}"><i class="fa fa-flask"></i> Survey</a></li>
+<li class="active"><i class="fa fa-cloud"></i> Results</li>
 {% endblock %}
 
 {% block panel-content %}
-  <div id="wordcloud"></div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">300 Most Popular Topics</h3>
+    </div>
+    <div class="panel-body">
+      <div id="wordcloud"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Statistics</h3>
+        </div>
+        <ul class="list-group">
+          <li class="list-group-item">
+            <span class="badge">{{ num_topics }}</span>
+            Total Topics
+          </li>
+          <li class="list-group-item">
+            <span class="badge">{{ avg_topic_weight|floatformat:3 }}</span>
+            Average Topic Weight
+          </li>
+          <li class="list-group-item">
+            <span class="badge">{{ num_responses }}</span>
+            Total Responses
+          </li>
+          <li class="list-group-item">
+            <span class="badge">{{ avg_topics_per_response|floatformat:3 }}</span>
+            Average Topics per Response
+          </li>
+          <li class="list-group-item">
+            <span class="badge">{{ min_topics_per_response }}</span>
+            Fewest Topics in a Response
+          </li>
+          <li class="list-group-item">
+            <span class="badge">{{ max_topics_per_response }}</span>
+            Most Topics in a Response
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Responses</h3>
+        </div>
+        <div class="panel-body">
+          <div id="timeseries"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 {% endblock %}
 
 {% block javascripts %}
   {{ block.super }}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+  <script src="{% static 'js/multiline.js' %}" type="text/javascript"></script>
   <script src="{% static 'js/libs/wordcloud.min.js' %}" type="text/javascript"></script>
   <script src="{% static 'js/libs/colorbrewer.min.js' %}" type="text/javascript"></script>
   <script type="text/javascript">
     (function() {
 
       var url    = "/api/topics/";
-      var fill   = d3.scale.ordinal().range(colorbrewer.Set1[9]);
+      var fill   = d3.scale.ordinal().range(colorbrewer.Dark2[8]);
       var width  = $("#wordcloud").width();
       var scale  = d3.scale.log().range([10, 100]);
       var layout = null;
@@ -32,7 +88,7 @@
 
           // Setup the layout with the various words.
           layout = d3.layout.cloud()
-            .size([width, 600])
+            .size([width, 500])
             .words(words.map(function(d) {
               return {text: d.title, size: scale(d.vote_total)};
             }))
@@ -68,6 +124,12 @@
             })
             .text(function(d) { return d.text; });
       }
+
+      // Draw timeseries
+      var ts = new MultilineChart("#timeseries");
+      var data = JSON.parse('{{ time_series|safe }}');
+      console.log(data);
+      ts.add_line('responses', data);
 
     })();
   </script>

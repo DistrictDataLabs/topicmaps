@@ -45,7 +45,8 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
 
     # Application URLs
-    url(r'^$', MultiTopicView.as_view(), name='home'),
+    url(r'^$', HomePageView.as_view(), name='home'),
+    url(r'^survey/$', MultiTopicView.as_view(), name='survey'),
     url(r'^results/$', ResultView.as_view(), name='results'),
     url(r'^terms/$', TemplateView.as_view(template_name='site/legal/terms.html'), name='terms'),
     url(r'^privacy/$', TemplateView.as_view(template_name='site/legal/privacy.html'), name='privacy'),

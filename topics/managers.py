@@ -19,6 +19,10 @@ Managers for the topic models.
 
 from django.db import models
 from titlecase import titlecase
+from qsstats import QuerySetStats
+
+from datetime import timedelta
+from django.utils import timezone
 from django.template.defaultfilters import slugify
 
 ##########################################################################
@@ -62,6 +66,14 @@ class TopicManager(models.Manager):
             vote_total=models.Sum('votes__vote')
         )
 
+    def mean_weight(self):
+        """
+        Returns the mean weight aggregation of all topics.
+        """
+        return self.with_votes().aggregate(
+            mean_weight=models.Avg('vote_total')
+        )['mean_weight']
+
 
 ##########################################################################
 ## Topic Manager
@@ -92,3 +104,36 @@ class VotingManager(models.Manager):
         return self.aggregate(
             total=models.Sum('vote')
         )
+
+    def responses(self):
+        """
+        Returns an aggregation of IP address and the count per IP.
+        """
+        query = self.values("ipaddr")
+        query = query.annotate(responses=models.Count('ipaddr'))
+        query = query.order_by('ipaddr')
+        return query
+
+    def response_stats(self):
+        """
+        Returns a list of statistics from the responses histogram.
+        """
+        return self.responses().aggregate(
+            num=models.Sum('responses'),
+            avg=models.Avg('responses'),
+            min=models.Min('responses'),
+            max=models.Max('responses'),
+        )
+
+    def num_responses(self):
+        """
+        Returns the number of distinct IP addresses
+        """
+        return self.aggregate(r=models.Count('ipaddr', distinct=True))['r']
+
+    def response_timeseries(self):
+        """
+        Returns a list of timeseries from the responses.
+        """
+        qss = QuerySetStats(self.all(), 'created')
+        return qss.time_series(timezone.now() - timedelta(days=7), timezone.now())
