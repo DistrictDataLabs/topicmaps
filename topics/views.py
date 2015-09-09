@@ -46,6 +46,12 @@ class MultiTopicView(FormView):
     def get_success_url(self):
         return reverse('results')
 
+    # add the request to the kwargs
+    def get_form_kwargs(self):
+        kwargs = super(MultiTopicView, self).get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
     def form_valid(self, form):
         form.save_topics()
         return super(MultiTopicView, self).form_valid(form)

@@ -18,10 +18,32 @@ Admin site registration of models for editing.
 ##########################################################################
 
 from django.contrib import admin
-from topics.models import Topic
+from topics.models import Topic, Vote
+from django.db.models import Sum
+
+##########################################################################
+## Admin Views
+##########################################################################
+
+class VoteInline(admin.TabularInline):
+
+    model = Vote
+    extra = 0
+    readonly_fields = ('created', )
+
+
+class TopicAdmin(admin.ModelAdmin):
+
+    inlines = [
+        VoteInline,
+    ]
+    readonly_fields = ('slug', 'created', 'vote_total')
+    list_display = ["title", "vote_total"]
+
 
 ##########################################################################
 ## Model Registration
 ##########################################################################
 
-admin.site.register(Topic)
+admin.site.register(Topic, TopicAdmin)
+admin.site.register(Vote)

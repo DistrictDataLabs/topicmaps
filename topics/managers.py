@@ -34,7 +34,7 @@ class TopicManager(models.Manager):
         """
         A get or create from a slug function.
         """
-        # Titlecase the topic 
+        # Titlecase the topic
         title = titlecase(title)
 
         # If the slug exists, return the object
@@ -53,3 +53,42 @@ class TopicManager(models.Manager):
         for line in text.splitlines():
             if line:
                 yield self.from_title(line)
+
+    def with_votes(self):
+        """
+        Annotates the topic model with a vote total.
+        """
+        return self.annotate(
+            vote_total=models.Sum('votes__vote')
+        )
+
+
+##########################################################################
+## Topic Manager
+##########################################################################
+
+
+class VotingManager(models.Manager):
+    """
+    Helper functions for vote management
+    """
+
+    def upvotes(self):
+        """
+        Returns the set of all up votes for a particular query.
+        """
+        return self.filter(vote=self.model.BALLOT.upvote)
+
+    def downvotes(self):
+        """
+        Returns the set of all down votes for a particular query.
+        """
+        return self.filter(vote=self.model.BALLOT.downvote)
+
+    def total(self):
+        """
+        Returns the sum of all up and down votes for a particular query.
+        """
+        return self.aggregate(
+            total=models.Sum('vote')
+        )
