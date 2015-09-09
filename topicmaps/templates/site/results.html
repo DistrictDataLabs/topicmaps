@@ -1,0 +1,14 @@
+{% extends 'site/home.html' %}
+
+{% block breadcrumbs %}
+<li><a href="/"><i class="fa fa-home"></i> Home</a></li>
+<li class="active"><i class="fa fa-flask"></i> Results</li>
+{% endblock %}
+
+{% block panel-content %}
+  <ul class="list-inline">
+    {% for topic in topics %}
+    <li>{{ topic }}</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

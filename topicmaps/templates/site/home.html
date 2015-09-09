@@ -1,4 +1,5 @@
 {% extends 'page.html' %}
+{% load bootstrap3 %}
 
 {% block content %}
 
@@ -9,15 +10,37 @@
       <!-- Page Title Area -->
       <div class="col-xs-12">
         <div class="page-header">
+          {% block page-header %}
           <h2>Topic Maps <small>District Data Labs</small></h2>
+          {% endblock %}
         </div>
       </div>
 
       <!-- Breadcrumbs navigation area -->
       <div class="col-sm-12">
         <ol class="breadcrumb">
-          <li><a href="/"><i class="fa fa-home"></i> Home</a></li>
+          {% block breadcrumbs %}
+          <li class="active"><i class="fa fa-home"></i> Home</li>
+          {% endblock %}
         </ol>
+      </div>
+
+      <!-- Panel Content Area -->
+      <div class="col-sm-12">
+        {% block panel-content %}
+
+        <!-- Topics Form -->
+        <form action="" method="post" class="form">
+          {% csrf_token %}
+          {% bootstrap_form form %}
+          {% buttons %}
+            <button type="submit" class="btn btn-default">
+              <i class="fa fa-flask"></i> Submit
+            </button>
+          {% endbuttons %}
+        </form>
+
+        {% endblock %}
       </div>
 
     </div><!-- primary content area ends -->

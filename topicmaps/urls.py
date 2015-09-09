@@ -24,6 +24,7 @@ from django.conf.urls import include, url
 from django.views.generic import TemplateView
 
 from topicmaps.views import *
+from topics.views import *
 
 ##########################################################################
 ## Endpoint Discovery
@@ -43,7 +44,8 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
 
     # Application URLs
-    url(r'^$', HomePageView.as_view(), name='home'),
+    url(r'^$', MultiTopicView.as_view(), name='home'),
+    url(r'^results/$', ResultView.as_view(), name='results'),
     url(r'^terms/$', TemplateView.as_view(template_name='site/legal/terms.html'), name='terms'),
     url(r'^privacy/$', TemplateView.as_view(template_name='site/legal/privacy.html'), name='privacy'),
 
