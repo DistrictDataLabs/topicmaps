@@ -30,7 +30,6 @@ from django.core.urlresolvers import reverse
 
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import APIException
 
 ##########################################################################
@@ -49,14 +48,11 @@ class ResultView(TemplateView):
         context['avg_topic_weight'] = Topic.objects.mean_weight()
         context['num_responses'] = Vote.objects.num_responses()
 
+        # Compute aggregate statistics via DB query.
         stats = Vote.objects.response_stats()
         context['avg_topics_per_response'] = stats['avg']
         context['min_topics_per_response'] = stats['min']
         context['max_topics_per_response'] = stats['max']
-        context['time_series'] = json.dumps([
-            {'date': d.strftime("%Y-%m-%d"), 'count': c}
-            for (d,c) in Vote.objects.response_timeseries()
-        ])
 
         return context
 
@@ -94,7 +90,6 @@ class TopicViewSet(viewsets.ViewSet):
 
     queryset = Topic.objects.with_votes()
     serializer_class = TopicSerializer
-    permission_classes = (AllowAny,)
 
     def random_topics(self, limit=10):
         last = Topic.objects.count() - 1
@@ -116,3 +111,20 @@ class TopicViewSet(viewsets.ViewSet):
             return Response(list(queryset))
         except Exception as e:
             raise BadParameter(str(e))
+
+
+class ResponseViewSet(viewsets.ViewSet):
+    """
+    Returns statistics and timeseries regarding the responses.
+    """
+
+    def list(self, request):
+        """
+        Returns the time series and other statistics about responses.
+        """
+
+        # Compute the time series information
+        return Response([
+            {'date': d.strftime("%Y-%m-%d"), 'count': c}
+            for (d,c) in Vote.objects.response_timeseries()
+        ])

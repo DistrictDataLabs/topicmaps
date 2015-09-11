@@ -107,7 +107,7 @@
           layout.start();
         })
         .fail(function() {
-          console.log("Could not fetch data from the API!");
+          console.log("Could not fetch topics data from the API!");
         });
 
 
@@ -132,9 +132,14 @@
 
       // Draw timeseries
       var ts = new MultilineChart("#timeseries");
-      var data = JSON.parse('{{ time_series|safe }}');
-      console.log(data);
-      ts.add_line('responses', data);
+      $.get("/api/responses")
+        .success(function(data) {
+          ts.add_line('responses', data);
+        })
+        .fail(function() {
+          console.log("Could not fetch responses data from the API!");
+        });
+
 
       // Set alert timeout
       setTimeout(function() {

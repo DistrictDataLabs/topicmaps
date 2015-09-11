@@ -34,6 +34,7 @@ from topics.views import *
 router = routers.DefaultRouter()
 router.register(r'status', HeartbeatViewSet, "status")
 router.register(r'topics', TopicViewSet, "topic")
+router.register(r'responses', ResponseViewSet, "response")
 
 ##########################################################################
 ## URL Patterns
