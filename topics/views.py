@@ -17,16 +17,18 @@ Views for the Topics application
 ## Imports
 ##########################################################################
 
-import json
+import csv
 import random
 
 from topics.serializers import *
 from topics.models import Topic, Vote
 from topics.forms import MultiTopicForm
 
-from django.views.generic import TemplateView
+from django.http import HttpResponse
+from django.views.generic import View, TemplateView
 from django.views.generic.edit import FormView
 from django.core.urlresolvers import reverse
+from braces.views import LoginRequiredMixin
 
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -75,6 +77,43 @@ class MultiTopicView(FormView):
         form.save_topics()
         return super(MultiTopicView, self).form_valid(form)
 
+
+##########################################################################
+## API/DRF Views
+##########################################################################
+
+class DataDownloadView(LoginRequiredMixin, View):
+
+    queryset = Vote.objects.all()
+
+    def get(self, request):
+        """
+        Returns a download of the data.
+        """
+        # Create the HttpResponse object with the appropriate CSV header.
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="topicmaps.csv"'
+
+        # Structures to anonymize IP addresses
+        idtag = 0
+        ipmap = {}
+        dtfmt = "%Y-%m-%d %H:%M"
+
+        # Write CSV to files
+        writer = csv.writer(response)
+        writer.writerow(('user', 'term', 'time'))
+        for vote in self.queryset:
+            # Set unique id tag for ip address if not exists
+            if vote.ipaddr not in ipmap:
+                idtag += 1
+                ipmap[vote.ipaddr] = idtag
+
+            # write the row to the CSV file
+            writer.writerow([
+                ipmap[vote.ipaddr], vote.topic, vote.created.strftime(dtfmt)
+            ])
+
+        return response
 
 ##########################################################################
 ## API/DRF Views
