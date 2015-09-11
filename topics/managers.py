@@ -54,7 +54,7 @@ class TopicManager(models.Manager):
         Basically a get or create for a batch insert of topics separated by
         newlines as written into a text field or similar.
         """
-        for line in text.splitlines():
+        for line in frozenset(text.splitlines()):
             if line:
                 yield self.from_title(line)
 
