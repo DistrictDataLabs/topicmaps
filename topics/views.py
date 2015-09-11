@@ -17,20 +17,21 @@ Views for the Topics application
 ## Imports
 ##########################################################################
 
-import json
+import csv
 import random
 
 from topics.serializers import *
 from topics.models import Topic, Vote
 from topics.forms import MultiTopicForm
 
-from django.views.generic import TemplateView
+from django.http import HttpResponse
+from django.views.generic import View, TemplateView
 from django.views.generic.edit import FormView
 from django.core.urlresolvers import reverse
+from braces.views import LoginRequiredMixin
 
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import APIException
 
 ##########################################################################
@@ -49,14 +50,11 @@ class ResultView(TemplateView):
         context['avg_topic_weight'] = Topic.objects.mean_weight()
         context['num_responses'] = Vote.objects.num_responses()
 
+        # Compute aggregate statistics via DB query.
         stats = Vote.objects.response_stats()
         context['avg_topics_per_response'] = stats['avg']
         context['min_topics_per_response'] = stats['min']
         context['max_topics_per_response'] = stats['max']
-        context['time_series'] = json.dumps([
-            {'date': d.strftime("%Y-%m-%d"), 'count': c}
-            for (d,c) in Vote.objects.response_timeseries()
-        ])
 
         return context
 
@@ -84,6 +82,43 @@ class MultiTopicView(FormView):
 ## API/DRF Views
 ##########################################################################
 
+class DataDownloadView(LoginRequiredMixin, View):
+
+    queryset = Vote.objects.all()
+
+    def get(self, request):
+        """
+        Returns a download of the data.
+        """
+        # Create the HttpResponse object with the appropriate CSV header.
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="topicmaps.csv"'
+
+        # Structures to anonymize IP addresses
+        idtag = 0
+        ipmap = {}
+        dtfmt = "%Y-%m-%d %H:%M"
+
+        # Write CSV to files
+        writer = csv.writer(response)
+        writer.writerow(('user', 'term', 'time'))
+        for vote in self.queryset:
+            # Set unique id tag for ip address if not exists
+            if vote.ipaddr not in ipmap:
+                idtag += 1
+                ipmap[vote.ipaddr] = idtag
+
+            # write the row to the CSV file
+            writer.writerow([
+                ipmap[vote.ipaddr], vote.topic, vote.created.strftime(dtfmt)
+            ])
+
+        return response
+
+##########################################################################
+## API/DRF Views
+##########################################################################
+
 class BadParameter(APIException):
 
     status_code    = 400
@@ -94,7 +129,6 @@ class TopicViewSet(viewsets.ViewSet):
 
     queryset = Topic.objects.with_votes()
     serializer_class = TopicSerializer
-    permission_classes = (AllowAny,)
 
     def random_topics(self, limit=10):
         last = Topic.objects.count() - 1
@@ -116,3 +150,20 @@ class TopicViewSet(viewsets.ViewSet):
             return Response(list(queryset))
         except Exception as e:
             raise BadParameter(str(e))
+
+
+class ResponseViewSet(viewsets.ViewSet):
+    """
+    Returns statistics and timeseries regarding the responses.
+    """
+
+    def list(self, request):
+        """
+        Returns the time series and other statistics about responses.
+        """
+
+        # Compute the time series information
+        return Response([
+            {'date': d.strftime("%Y-%m-%d"), 'count': c}
+            for (d,c) in Vote.objects.response_timeseries()
+        ])

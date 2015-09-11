@@ -34,6 +34,7 @@ from topics.views import *
 router = routers.DefaultRouter()
 router.register(r'status', HeartbeatViewSet, "status")
 router.register(r'topics', TopicViewSet, "topic")
+router.register(r'responses', ResponseViewSet, "response")
 
 ##########################################################################
 ## URL Patterns
@@ -48,6 +49,7 @@ urlpatterns = [
     url(r'^$', HomePageView.as_view(), name='home'),
     url(r'^survey/$', MultiTopicView.as_view(), name='survey'),
     url(r'^results/$', ResultView.as_view(), name='results'),
+    url(r'^download/$', DataDownloadView.as_view(), name='download'),
     url(r'^terms/$', TemplateView.as_view(template_name='site/legal/terms.html'), name='terms'),
     url(r'^privacy/$', TemplateView.as_view(template_name='site/legal/privacy.html'), name='privacy'),
 
