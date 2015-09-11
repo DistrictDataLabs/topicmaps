@@ -204,7 +204,7 @@ REST_FRAMEWORK = {
 
     ## Default permissions to access the API
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ),
 
     ## Pagination in the API
