@@ -103,6 +103,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     # Third party apps
+    'social.apps.django_app.default',
     'rest_framework',
     'bootstrap3',
 
@@ -120,6 +121,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
 )
 
 ## Internationalization
@@ -148,6 +150,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social.apps.django_app.context_processors.backends',
             ],
         },
     },
@@ -190,6 +193,36 @@ EMAIL_SUBJECT_PREFIX = '[TOPICMAPS] '
 ##########################################################################
 
 GRAPPELLI_ADMIN_TITLE = "DDL Topic Maps CMS"
+
+##########################################################################
+## Social Authentication
+##########################################################################
+
+## Support for Social Auth authentication backends
+AUTHENTICATION_BACKENDS = (
+    'social.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+## Social authentication strategy
+SOCIAL_AUTH_STRATEGY = 'social.strategies.django_strategy.DjangoStrategy'
+SOCIAL_AUTH_STORAGE = 'social.apps.django_app.default.models.DjangoStorage'
+
+## Google-specific authentication keys
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = environ_setting("GOOGLE_OAUTH2_CLIENT_ID", "")
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = environ_setting("GOOGLE_OAUTH2_CLIENT_SECRET", "")
+
+## Domain whitelist
+SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = [
+    'districtdatalabs.com',
+]
+
+LOGIN_REDIRECT_URL = "admin:index"
+
+## Error handling
+SOCIAL_AUTH_LOGIN_ERROR_URL = "login"
+SOCIAL_AUTH_GOOGLE_OAUTH2_SOCIAL_AUTH_RAISE_EXCEPTIONS = False
+SOCIAL_AUTH_RAISE_EXCEPTIONS = False
 
 ##########################################################################
 ## Django REST Framework
