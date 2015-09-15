@@ -10,7 +10,7 @@
  *  - underscore
  */
 
-(function() {
+(function($) {
 
   // Do the CSRf AJAX Modification
   var csrfToken   = $('input[name="csrfmiddlewaretoken"]').val();
@@ -32,6 +32,16 @@
       $("#footerStatus").addClass("text-danger");
     });
 
+  // Add the hotkeys for easy management
+  $(document).ready(function() {
+    $(document).keyup(function(e) {
+      if (e.keyCode == 27) {
+        e.preventDefault();
+        window.location = "/admin/";
+      }
+    });
+  });
+
   console.log("Topic Maps App is started and ready");
 
-})();
+})(jQuery);
