@@ -131,11 +131,15 @@ class TopicViewSet(viewsets.ViewSet):
     serializer_class = TopicSerializer
 
     def random_topics(self, limit=10):
-        last = Topic.objects.count() - 1
+        last = Topic.objects.filter(is_canonical=True).count() - 1
         indices = random.sample(xrange(0, last), limit)
 
         for idx in indices:
-            yield self.queryset.values('title', 'vote_total')[idx]
+            topic = self.queryset[idx]
+            yield {
+                'title': topic.title,
+                'vote_total': int(topic.vote_total),
+            }
 
     def list(self, request):
         try:
@@ -145,9 +149,14 @@ class TopicViewSet(viewsets.ViewSet):
             if ordering == 'random':
                 return Response(list(self.random_topics(limit)))
 
-            queryset = self.queryset.order_by(ordering)
-            queryset = queryset.values('title', 'vote_total')[:limit]
-            return Response(list(queryset))
+            queryset = self.queryset[:limit]
+            return Response([
+                {
+                    'title': topic.title,
+                    'vote_total': int(topic.vote_total),
+                }
+                for topic in queryset
+            ])
         except Exception as e:
             raise BadParameter(str(e))
 

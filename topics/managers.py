@@ -17,6 +17,8 @@ Managers for the topic models.
 ## Imports
 ##########################################################################
 
+import os
+
 from django.db import models
 from titlecase import titlecase
 from qsstats import QuerySetStats
@@ -24,6 +26,19 @@ from qsstats import QuerySetStats
 from datetime import timedelta
 from django.utils import timezone
 from django.template.defaultfilters import slugify
+
+
+##########################################################################
+## Vote Aggregation SQL
+##########################################################################
+
+VOTE_AGGREGATION_SQL  = None
+VOTE_AGGREGATION_PATH = os.path.join(
+    os.path.dirname(__file__), 'sql', 'votes.sql'
+)
+
+with open(VOTE_AGGREGATION_PATH, 'r') as f:
+    VOTE_AGGREGATION_SQL = f.read()
 
 ##########################################################################
 ## Topic Manager
@@ -62,17 +77,15 @@ class TopicManager(models.Manager):
         """
         Annotates the topic model with a vote total.
         """
-        return self.annotate(
-            vote_total=models.Sum('votes__vote')
-        )
+        return self.raw(VOTE_AGGREGATION_SQL)
 
     def mean_weight(self):
         """
         Returns the mean weight aggregation of all topics.
         """
-        return self.with_votes().aggregate(
-            mean_weight=models.Avg('vote_total')
-        )['mean_weight']
+        count = float(self.filter(is_canonical=True).count())
+        total = sum(float(topic.vote_total) for topic in self.with_votes())
+        return total / count
 
 
 ##########################################################################

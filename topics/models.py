@@ -33,9 +33,11 @@ class Topic(TimeStampedModel):
     """
 
     # Topic fields
-    title   = models.CharField(max_length=128)
-    slug    = AutoSlugField(populate_from='title', unique=True)
-    link    = models.URLField(null=True, blank=True, default=None)
+    title     = models.CharField(max_length=128)
+    slug      = AutoSlugField(populate_from='title', unique=True)
+    link      = models.URLField(null=True, blank=True, default=None)
+    refers_to = models.ForeignKey('self', related_name='references', null=True, blank=True, default=None)
+    is_canonical = models.BooleanField(default=True)
 
     # Custom topic manager
     objects = TopicManager()
@@ -43,7 +45,7 @@ class Topic(TimeStampedModel):
     # Topic meta class
     class Meta:
         db_table = 'topics'
-        ordering = ('-created',)
+        ordering = ('title', )
 
     def __unicode__(self):
         return self.title
@@ -52,9 +54,15 @@ class Topic(TimeStampedModel):
         """
         Accumulates the votes via aggregation
         """
-        return self.votes.aggregate(
+        votes = self.votes.aggregate(
             total=models.Sum('vote')
         )['total']
+
+        if self.is_canonical:
+            for ref in self.references.all():
+                votes += ref.vote_total()
+
+        return votes
 
 ##########################################################################
 ## Topic Voting
